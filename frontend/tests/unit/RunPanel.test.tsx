@@ -87,10 +87,6 @@ describe('RunPanel while running', () => {
 
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(screen.getByText('Last run scored 2 of 2 contractors.')).toBeInTheDocument();
-    // the date of that run sits next to the outcome, so reps know how fresh the sheet is
-    const when = screen.getByText('Sep 26, 2026');
-    expect(when).toHaveAttribute('dateTime', '2026-09-26T10:01:00Z');
-    expect(when.parentElement).toHaveTextContent('Last Build Call List Ran: Sep 26, 2026');
 
     // a final refresh after the terminal state guarantees the list shows finished leads
     await act(async () => { await vi.advanceTimersByTimeAsync(1000); });

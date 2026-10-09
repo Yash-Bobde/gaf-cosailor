@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, Play, Square, CheckCircle2, AlertTriangle, CircleSlash } from 'lucide-react';
 import type { PipelineRunParams, PipelineStatusResponse, Segment } from '@/lib/types';
-import { formatDate, runFailureMessage } from '@/lib/format';
+import { runFailureMessage } from '@/lib/format';
 import { usePipelineRun } from '@/hooks/usePipelineRun';
 import { Field, Segmented } from './RunFields';
 
@@ -70,37 +70,27 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function Outcome({ run }: { run: PipelineStatusResponse }) {
-  const when = run.finished_at ?? run.started_at;
   if (run.status === 'completed') {
     const failed = run.leads_failed ?? 0;
     const text = run.leads_scraped === 0
       ? 'Last run finished: GAF lists no contractors for that search.'
       : `Last run scored ${run.leads_enriched} of ${run.leads_scraped} contractors${failed ? ` — ${failed} need a retry` : ''}.`;
-    return <OutcomeLine icon={<CheckCircle2 className="h-4 w-4 text-good" />} text={text} when={when} />;
+    return <OutcomeLine icon={<CheckCircle2 className="h-4 w-4 text-good" />} text={text} />;
   }
   if (run.status === 'cancelled') {
-    return <OutcomeLine icon={<CircleSlash className="h-4 w-4 text-ink-soft" />} text={`Last run cancelled after scoring ${run.leads_enriched} leads. Run again to pick up where it stopped.`} when={when} />;
+    return <OutcomeLine icon={<CircleSlash className="h-4 w-4 text-ink-soft" />} text={`Last run cancelled after scoring ${run.leads_enriched} leads. Run again to pick up where it stopped.`} />;
   }
   if (run.status === 'failed') {
-    return <OutcomeLine icon={<AlertTriangle className="h-4 w-4 text-warn" />} text={runFailureMessage(run.error_message)} when={when} />;
+    return <OutcomeLine icon={<AlertTriangle className="h-4 w-4 text-warn" />} text={runFailureMessage(run.error_message)} />;
   }
   return null;
 }
 
-/** Outcome sentence plus the date of that run, so reps can see how fresh the call sheet is. */
-function OutcomeLine({ icon, text, when }: { icon: React.ReactNode; text: string; when: string | null }) {
-  const date = formatDate(when);
+function OutcomeLine({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <p className="flex items-start gap-2 text-sm text-ink-soft">
       <span className="mt-0.5 shrink-0" aria-hidden="true">{icon}</span>
-      <span className="flex flex-wrap gap-x-3 gap-y-1">
-        <span>{text}</span>
-        {when && date && (
-          <span className="border-l border-line-strong pl-3">
-            Last Build Call List Ran: <time dateTime={when} className="font-medium text-ink">{date}</time>
-          </span>
-        )}
-      </span>
+      {text}
     </p>
   );
 }

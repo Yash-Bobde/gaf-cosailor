@@ -1,0 +1,44 @@
+# Environment / secrets
+backend/.env
+frontend/.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Node
+node_modules/
+.next/
+frontend/out/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+*.tsbuildinfo
+
+# Test artifacts
+coverage.xml
+.coverage
+htmlcov/
+
+# Brand film build outputs (regenerate with docs/brand/film/score.py / render.mjs)
+docs/brand/film/score.wav
+docs/brand/film/stills/
+
+# Local database backups (may contain research data)
+backups/

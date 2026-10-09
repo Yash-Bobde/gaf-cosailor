@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: cosailor-backend
+    env: docker
+    region: oregon
+    plan: free
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_PRESET
+        value: fast
+      - key: PIPELINE_CONCURRENCY
+        value: "8"

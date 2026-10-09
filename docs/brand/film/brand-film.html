@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cosailor Brand Film</title>
+<!--
+  Cosailor Insights brand film. 1920×1080, driven by render(t) so every frame is
+  deterministic. Open in a browser to watch it play (space = pause, ←/→ = seek),
+  or run render.mjs to encode it to MP4. Values follow docs/brand-guidelines.md.
+-->
+<style>
+  @font-face { font-family: Newsreader; src: url(../../../frontend/app/fonts/newsreader-latin.woff2) format('woff2'); font-weight: 500 600; }
+  @font-face { font-family: Newsreader; src: url(../../../frontend/app/fonts/newsreader-italic-latin.woff2) format('woff2'); font-weight: 500 600; font-style: italic; }
+  @font-face { font-family: Jakarta; src: url(../../../frontend/app/fonts/plus-jakarta-sans-latin.woff2) format('woff2'); font-weight: 400 700; }
+  @font-face { font-family: JetMono; src: url(../../../frontend/app/fonts/jetbrains-mono-latin.woff2) format('woff2'); font-weight: 400 500; }
+
+  :root {
+    --paper: #f6f4ef; --card: #ffffff; --ink: #1a1d21; --ink-soft: #4a5059; --ink-faint: #6b7079;
+    --line: #e3dfd6; --line-strong: #cfc9bc; --accent: #c2410c; --accent-strong: #9a3412;
+    --accent-tint: #fdf0e8; --good: #15803d; --good-tint: #eaf6ee; --warn: #a16207;
+    --warn-tint: #fbf3e0; --bad: #b91c1c; --bad-tint: #fcecec;
+    --serif: Newsreader, Georgia, serif; --sans: Jakarta, system-ui, sans-serif; --mono: JetMono, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; overflow: hidden; }
+  #stage {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden;
+    background: var(--paper); color: var(--ink); font-family: var(--sans);
+    transform-origin: 0 0;
+  }
+  .scene { position: absolute; inset: 0; opacity: 0; isolation: isolate; }
+  .center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .eyebrow { font-family: var(--mono); font-size: 22px; color: var(--ink-faint); letter-spacing: 0.02em; }
+  .eyebrow b { color: var(--accent); font-weight: 500; }
+  .h1 { font-family: var(--serif); font-weight: 600; font-size: 104px; line-height: 1.05; letter-spacing: -0.02em; }
+  .h2 { font-family: var(--serif); font-weight: 600; font-size: 72px; line-height: 1.1; letter-spacing: -0.015em; }
+  .sub { font-size: 30px; color: var(--ink-soft); line-height: 1.45; }
+  .pad { position: absolute; left: 160px; right: 160px; top: 130px; }
+  .grain { position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image: radial-gradient(rgba(26,29,33,.035) 1px, transparent 1px); background-size: 6px 6px; }
+  .rule { position: absolute; left: 160px; right: 160px; bottom: 88px; height: 1px; background: var(--line-strong); }
+  .foot { position: absolute; left: 160px; right: 160px; bottom: 44px; display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 18px; color: var(--ink-faint); }
+
+  /* S1 logo */
+  #s1-mark { width: 360px; height: 270px; }
+  #s1-word { font-family: var(--serif); font-weight: 600; font-size: 168px; letter-spacing: -0.03em; margin-top: 12px; }
+  #s1-desc { font-size: 32px; color: var(--ink-faint); margin-top: 8px; }
+
+  /* S2 promise */
+  #s2 .line { display: block; }
+  #s2-l2 { font-style: italic; color: var(--ink-soft); font-weight: 500; }
+  .under { position: relative; display: inline-block; }
+  .under i { position: absolute; left: 0; bottom: 6px; height: 12px; background: var(--accent); opacity: .9; border-radius: 6px; z-index: -1; }
+
+  /* S3 swatches */
+  .swatches { display: flex; gap: 40px; margin-top: 90px; }
+  .sw { flex: 1; height: 520px; border-radius: 28px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); }
+  .sw .n { font-family: var(--serif); font-size: 52px; font-weight: 600; }
+  .sw .x { font-family: var(--mono); font-size: 26px; margin-top: 8px; opacity: .85; }
+  .sw .r { font-size: 24px; margin-top: 18px; line-height: 1.4; opacity: .85; }
+
+  /* S4 palette */
+  .chips { display: grid; grid-template-columns: repeat(8, 1fr); gap: 22px; margin-top: 70px; }
+  .chip { height: 250px; border-radius: 20px; border: 1px solid var(--line); overflow: hidden; background: var(--card); display: flex; flex-direction: column; }
+  .chip .c { flex: 1; }
+  .chip .t { padding: 14px 16px; font-family: var(--mono); font-size: 16px; color: var(--ink-soft); line-height: 1.45; }
+  .chip .t b { display: block; font-family: var(--sans); font-size: 18px; color: var(--ink); font-weight: 600; }
+  #s4-ratio { position: absolute; right: 160px; top: 130px; text-align: right; }
+  #s4-ratio .v { font-family: var(--serif); font-size: 120px; font-weight: 600; color: var(--accent); line-height: 1; }
+
+  /* S5 type */
+  .types { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 64px; margin-top: 90px; }
+  .ty { border-top: 2px solid var(--ink); padding-top: 28px; }
+  .ty .k { font-family: var(--mono); font-size: 22px; color: var(--accent); }
+  .ty .f { font-size: 22px; color: var(--ink-faint); margin-top: 6px; }
+  .ty .s { margin-top: 44px; }
+
+  /* S6 roof */
+  #s6-glyph { width: 600px; height: 450px; }
+  #s6-num { font-family: var(--serif); font-size: 220px; font-weight: 600; line-height: 1; }
+  .badge { display: inline-flex; align-items: center; border-radius: 999px; border: 2px solid; padding: 10px 30px; font-size: 34px; font-weight: 600; letter-spacing: .01em; }
+
+  /* S7 voice */
+  .quote { font-family: var(--serif); font-size: 56px; font-weight: 500; line-height: 1.2; margin-bottom: 38px; }
+  .quote small { display: block; font-family: var(--mono); font-size: 20px; color: var(--ink-faint); margin-bottom: 8px; }
+  .no { font-size: 44px; color: var(--ink-faint); margin-bottom: 26px; position: relative; display: inline-block; }
+  .no i { position: absolute; left: -6px; top: 52%; height: 4px; background: var(--bad); border-radius: 2px; }
+
+  /* S8 call sheet */
+  .sheet { margin-top: 60px; background: var(--card); border: 1px solid var(--line); border-radius: 28px; overflow: hidden; }
+  .row { display: grid; grid-template-columns: 110px 1fr 250px 260px 230px; align-items: center; gap: 24px; padding: 26px 40px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row .nm { font-family: var(--serif); font-size: 36px; font-weight: 600; }
+  .row .why { font-size: 21px; color: var(--ink-soft); margin-top: 4px; }
+  .row .loc { font-size: 22px; color: var(--ink-faint); }
+  .row .ph { font-family: var(--mono); font-size: 22px; color: var(--ink); }
+  .row .badge { font-size: 22px; padding: 6px 18px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grain"></div>
+
+  <!-- S1 · Logo -->
+  <section class="scene center" id="s1">
+    <svg id="s1-mark" viewBox="0 0 32 24" aria-hidden="true">
+      <path id="s1-fill" d="M2 22 L2 18 L16 4 L30 18 L30 22" fill="var(--accent-tint)" stroke="none" />
+      <path id="s1-path" d="M2 22 L2 18 L16 4 L30 18 L30 22" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" />
+    </svg>
+    <div id="s1-word">Cosailor</div>
+    <div id="s1-desc">Insights · GAF contractor call sheet</div>
+  </section>
+
+  <!-- S2 · Promise -->
+  <section class="scene center" id="s2">
+    <div class="h1" style="text-align:center; font-size:128px;">
+      <span class="line" id="s2-l1">Know who to call <span class="under">first,<i id="s2-u"></i></span></span>
+      <span class="line" id="s2-l2">and walk into the call prepared.</span>
+    </div>
+  </section>
+
+  <!-- S3 · Concept -->
+  <section class="scene" id="s3">
+    <div class="pad">
+      <div class="eyebrow"><b>01</b> — The idea</div>
+      <div class="h2" id="s3-h" style="margin-top:24px">A printed job sheet on a roofing site.</div>
+      <div class="swatches">
+        <div class="sw" id="s3-a" style="background:var(--paper)"><div class="n">Paper</div><div class="x">#F6F4EF</div><div class="r">The page. Warm, calm, easy on a screen all day.</div></div>
+        <div class="sw" id="s3-b" style="background:var(--ink); color:#fff; border-color:var(--ink)"><div class="n">Ink</div><div class="x">#1A1D21</div><div class="r">Every word a rep reads. 15.4 : 1 on paper.</div></div>
+        <div class="sw" id="s3-c" style="background:var(--accent); color:#fff; border-color:var(--accent)"><div class="n">Safety orange</div><div class="x">#C2410C</div><div class="r">One mark per screen: the thing to do next.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S4 · Palette -->
+  <section class="scene" id="s4">
+    <div class="pad">
+      <div class="eyebrow"><b>02</b> — Colour</div>
+      <div class="h2" style="margin-top:24px">Quiet neutrals. One loud colour.</div>
+      <div class="chips" id="s4-chips"></div>
+    </div>
+    <div id="s4-ratio"><div class="v" id="s4-v">0.00</div><div class="sub" style="font-size:24px">ink on paper · WCAG AAA</div></div>
+  </section>
+
+  <!-- S5 · Type -->
+  <section class="scene" id="s5">
+    <div class="pad">
+      <div class="eyebrow"><b>03</b> — Type</div>
+      <div class="h2" style="margin-top:24px">Serif to remember. Sans to read. Mono to dial.</div>
+      <div class="types">
+        <div class="ty" id="s5-a"><div class="k">Remember</div><div class="f">Newsreader · 500–600</div>
+          <div class="s" style="font-family:var(--serif); font-size:92px; font-weight:600; line-height:1.02; letter-spacing:-.02em">Summit Ridge Roofing</div></div>
+        <div class="ty" id="s5-b"><div class="k">Read</div><div class="f">Plus Jakarta Sans · 400–700</div>
+          <div class="s" style="font-size:34px; line-height:1.45; color:var(--ink-soft)">Three talking points, a recommended approach, and who to ask for.</div></div>
+        <div class="ty" id="s5-c"><div class="k">Dial</div><div class="f">JetBrains Mono · 400–500</div>
+          <div class="s" style="font-family:var(--mono); font-size:40px; line-height:1.6">(212) 555-0147<br><span style="color:var(--ink-faint)">12.4 mi</span><br><span style="color:var(--accent)">8.1 / 10</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S6 · RoofPitch -->
+  <section class="scene" id="s6">
+    <div class="pad">
+      <div class="eyebrow"><b>04</b> — The signature mark</div>
+      <div class="h2" style="margin-top:24px">The roof rises with the priority.</div>
+    </div>
+    <div style="position:absolute; left:160px; top:400px; display:flex; align-items:center; gap:140px">
+      <svg id="s6-glyph" viewBox="0 0 48 36" aria-hidden="true">
+        <line x1="2" y1="34" x2="46" y2="34" stroke="var(--line-strong)" stroke-width="1" />
+        <path id="s6-body" fill-opacity="0.12" stroke-width="1" stroke-linejoin="round" />
+        <path id="s6-ridge" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div>
+        <div id="s6-num">2.0</div>
+        <div style="margin-top:28px"><span class="badge" id="s6-badge">Nurture</span></div>
+        <div class="sub" id="s6-hint" style="margin-top:28px; max-width:620px">Keep warm, low urgency</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- S7 · Voice -->
+  <section class="scene" id="s7">
+    <div class="pad">
+      <div class="eyebrow"><b>05</b> — Voice</div>
+      <div class="h2" style="margin-top:24px">Direct. Grounded. Honest.</div>
+    </div>
+    <div style="position:absolute; left:160px; top:380px; width:1040px">
+      <div class="quote" id="s7-q1"><small>A rank</small>“Call first.”</div>
+      <div class="quote" id="s7-q2"><small>A failure</small>“Research failed, so no brief was written — nothing was guessed.”</div>
+      <div class="quote" id="s7-q3"><small>A person</small>“Named in the research, but buying authority is not established.”</div>
+    </div>
+    <div style="position:absolute; left:1340px; top:392px">
+      <div class="eyebrow" style="margin-bottom:34px">We don't say</div>
+      <div><span class="no" id="s7-n1">revolutionary<i></i></span></div>
+      <div><span class="no" id="s7-n2">seamless<i></i></span></div>
+      <div><span class="no" id="s7-n3">leverage<i></i></span></div>
+      <div><span class="no" id="s7-n4">AI-powered<i></i></span></div>
+      <div><span class="no" id="s7-n5">guaranteed<i></i></span></div>
+    </div>
+  </section>
+
+  <!-- S8 · Call sheet -->
+  <section class="scene" id="s8">
+    <div class="pad" style="top:110px">
+      <div class="eyebrow"><b>06</b> — In the product</div>
+      <div class="h2" style="margin-top:24px">Who to call first, already ranked.</div>
+      <div class="sheet" id="s8-sheet"></div>
+    </div>
+  </section>
+
+  <!-- S9 · End card -->
+  <section class="scene center" id="s9">
+    <svg viewBox="0 0 32 24" style="width:200px; height:150px" aria-hidden="true">
+      <path d="M2 22 L2 18 L16 4 L30 18 L30 22" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" />
+    </svg>
+    <div style="font-family:var(--serif); font-weight:600; font-size:132px; letter-spacing:-.03em; margin-top:10px">Cosailor</div>
+    <div id="s9-tag" style="font-family:var(--serif); font-style:italic; font-size:48px; color:var(--ink-soft); margin-top:18px">Know who to call first.</div>
+    <div id="s9-foot" style="font-family:var(--mono); font-size:22px; color:var(--ink-faint); margin-top:60px">Cosailor Insights · GAF contractor call sheet</div>
+  </section>
+
+  <div class="rule" id="rule"></div>
+  <div class="foot" id="foot"><span>Cosailor Insights — brand guidelines v1.0</span><span id="clock">00:00</span></div>
+</div>
+
+<script>
+const DURATION = 54;
+const $ = (id) => document.getElementById(id);
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+/** Opacity envelope for a scene visible from a to b. */
+const vis = (t, a, b, f = 0.6) => Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b));
+/** Rise-in: fade and lift an element from start s over d seconds. */
+function rise(el, t, s, d = 0.7, dy = 40) {
+  const k = easeOut(prog(t, s, s + d));
+  el.style.opacity = k;
+  el.style.transform = `translateY(${(1 - k) * dy}px)`;
+}
+
+// ---- Build data-driven parts once ----
+const CHIPS = [
+  ['Paper', '#F6F4EF', 'page'], ['Card', '#FFFFFF', 'panels'], ['Ink', '#1A1D21', '15.39 : 1'], ['Ink soft', '#4A5059', '7.40 : 1'],
+  ['Ink faint', '#6B7079', '4.53 : 1'], ['Line', '#E3DFD6', 'dividers'], ['Line strong', '#CFC9BC', 'inputs'], ['Accent', '#C2410C', '4.71 : 1'],
+  ['Accent strong', '#9A3412', '6.65 : 1'], ['Accent tint', '#FDF0E8', 'mark fill'], ['Good', '#15803D', '4.56 : 1'], ['Good tint', '#EAF6EE', 'surface'],
+  ['Warn', '#A16207', 'icons only'], ['Warn tint', '#FBF3E0', 'surface'], ['Bad', '#B91C1C', '5.89 : 1'], ['Bad tint', '#FCECEC', 'surface'],
+];
+$('s4-chips').innerHTML = CHIPS.map(([n, h, r]) =>
+  `<div class="chip"><div class="c" style="background:${h}"></div><div class="t"><b>${n}</b>${h}<br>${r}</div></div>`).join('');
+
+const TIER = (v) => v >= 7.5
+  ? { label: 'Call first', hint: 'Strong fit and clear opportunity signals', color: 'var(--accent)', bg: 'var(--accent)', fg: '#fff' }
+  : v >= 5.5
+    ? { label: 'This week', hint: 'Good fit — worth a call soon', color: 'var(--ink)', bg: 'var(--card)', fg: 'var(--ink)' }
+    : { label: 'Nurture', hint: 'Keep warm, low urgency', color: 'var(--ink-faint)', bg: 'transparent', fg: 'var(--ink-soft)' };
+const peakY = (v) => 30 - (4 + (Math.max(0, Math.min(10, v)) / 10) * 22);
+function roofSvg(v, w = 96) {
+  const c = TIER(v).color, y = peakY(v);
+  return `<svg viewBox="0 0 48 36" width="${w}" height="${w * 0.75}"><line x1="2" y1="34" x2="46" y2="34" stroke="var(--line-strong)" stroke-width="1.5"/>
+    <path d="M4 34 L4 30 L24 ${y} L44 30 L44 34" fill="${c}" fill-opacity="${v >= 7.5 ? .14 : .08}" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M4 30 L24 ${y} L44 30" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function badge(v) {
+  const k = TIER(v);
+  return `<span class="badge" style="border-color:${k.color}; background:${k.bg}; color:${k.fg}">${k.label}</span>`;
+}
+const ROWS = [
+  [9.1, 'Summit Ridge Roofing', 'Master Elite · uses a competitor underlayment', 'Brooklyn, NY', '(718) 555-0132'],
+  [8.3, 'Hudson Line Exteriors', 'Hiring crews · new GAF certification', 'Jersey City, NJ', '(201) 555-0178'],
+  [6.4, 'Greenpoint Roof & Gutter', 'Solid ratings · mid-size residential', 'Queens, NY', '(347) 555-0119'],
+  [4.2, 'Bayview Home Services', 'Small crew · few buying signals', 'Staten Island, NY', '(929) 555-0164'],
+];
+$('s8-sheet').innerHTML = ROWS.map(([v, n, why, loc, ph], i) =>
+  `<div class="row" id="s8-r${i}"><div>${roofSvg(v)}</div><div><div class="nm">${n}</div><div class="why">${why}</div></div>
+   <div class="loc">${loc}</div><div class="ph">${ph}</div><div>${badge(v)}</div></div>`).join('');
+
+const markPath = $('s1-path');
+const markLen = markPath.getTotalLength();
+markPath.style.strokeDasharray = markLen;
+
+// ---- The timeline ----
+function render(t) {
+  // S1 · logo (0–5)
+  $('s1').style.opacity = vis(t, 0, 5.2, 0.4);
+  markPath.style.strokeDashoffset = markLen * (1 - easeInOut(prog(t, 0.3, 1.6)));
+  $('s1-fill').style.opacity = easeOut(prog(t, 1.3, 2.0));
+  const w = easeOut(prog(t, 1.6, 2.6));
+  $('s1-word').style.clipPath = `inset(0 ${(1 - w) * 100}% 0 0)`;
+  rise($('s1-desc'), t, 2.6, 0.7, 20);
+
+  // S2 · promise (5–10.5)
+  $('s2').style.opacity = vis(t, 5.0, 10.5);
+  rise($('s2-l1'), t, 5.4);
+  rise($('s2-l2'), t, 6.4);
+  $('s2-u').style.width = `${easeOut(prog(t, 7.4, 8.2)) * 100}%`;
+
+  // S3 · concept (10.5–16.5)
+  $('s3').style.opacity = vis(t, 10.5, 16.5);
+  rise($('s3-h'), t, 10.8);
+  ['s3-a', 's3-b', 's3-c'].forEach((id, i) => rise($(id), t, 11.6 + i * 0.35, 0.8, 80));
+
+  // S4 · palette (16.5–22.5)
+  $('s4').style.opacity = vis(t, 16.5, 22.5);
+  [...$('s4-chips').children].forEach((el, i) => rise(el, t, 17.0 + i * 0.08, 0.6, 50));
+  $('s4-v').textContent = (15.39 * easeOut(prog(t, 18.6, 20.4))).toFixed(2);
+  rise($('s4-ratio'), t, 18.4, 0.6, 20);
+
+  // S5 · type (22.5–28.5)
+  $('s5').style.opacity = vis(t, 22.5, 28.5);
+  ['s5-a', 's5-b', 's5-c'].forEach((id, i) => rise($(id), t, 23.0 + i * 0.6, 0.8, 50));
+
+  // S6 · RoofPitch (28.5–35.5)
+  $('s6').style.opacity = vis(t, 28.5, 35.5);
+  const v = 2 + 7.1 * easeInOut(prog(t, 29.6, 33.6));
+  const k = TIER(v), y = peakY(v);
+  $('s6-body').setAttribute('d', `M4 34 L4 30 L24 ${y} L44 30 L44 34`);
+  $('s6-ridge').setAttribute('d', `M4 30 L24 ${y} L44 30`);
+  for (const id of ['s6-body', 's6-ridge']) $(id).setAttribute('stroke', k.color);
+  $('s6-body').setAttribute('fill', k.color);
+  $('s6-num').textContent = v.toFixed(1);
+  $('s6-num').style.color = v >= 7.5 ? 'var(--accent)' : 'var(--ink)';
+  const b = $('s6-badge');
+  b.textContent = k.label; b.style.borderColor = k.color; b.style.background = k.bg; b.style.color = k.fg;
+  $('s6-hint').textContent = k.hint;
+
+  // S7 · voice (35.5–42.5)
+  $('s7').style.opacity = vis(t, 35.5, 42.5);
+  ['s7-q1', 's7-q2', 's7-q3'].forEach((id, i) => rise($(id), t, 36.0 + i * 0.9, 0.8, 30));
+  for (let i = 1; i <= 5; i++) {
+    const el = $(`s7-n${i}`), s = 37.2 + i * 0.45;
+    el.style.opacity = 0.35 + 0.65 * easeOut(prog(t, s - 0.5, s));
+    el.querySelector('i').style.width = `calc(${easeOut(prog(t, s, s + 0.4)) * 100}% + 12px)`;
+  }
+
+  // S8 · call sheet (42.5–48.5)
+  $('s8').style.opacity = vis(t, 42.5, 48.5);
+  rise($('s8-sheet'), t, 42.8, 0.7, 30);
+  ROWS.forEach((_, i) => rise($(`s8-r${i}`), t, 43.4 + i * 0.28, 0.5, 14));
+
+  // S9 · end card (48.5–54)
+  $('s9').style.opacity = vis(t, 48.5, 60, 0.8);
+  rise($('s9-tag'), t, 49.4, 0.8, 20);
+  rise($('s9-foot'), t, 50.2, 0.8, 10);
+
+  // Chrome: footer rule and clock hide on the logo and end cards.
+  const chrome = Math.min(prog(t, 10.2, 10.8), 1 - prog(t, 48.2, 48.8));
+  $('rule').style.opacity = chrome; $('foot').style.opacity = chrome;
+  const s = Math.floor(t);
+  $('clock').textContent = `00:${String(s).padStart(2, '0')} / 00:${DURATION}`;
+}
+
+// ---- Fit to window & live playback (the renderer drives render(t) directly) ----
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const st = $('stage');
+  st.style.transform = `scale(${s})`;
+  st.style.left = `${(innerWidth - 1920 * s) / 2}px`;
+  st.style.top = `${(innerHeight - 1080 * s) / 2}px`;
+}
+window.render = render;
+window.DURATION = DURATION;
+if (!new URLSearchParams(location.search).has('capture')) {
+  addEventListener('resize', fit); fit();
+  let t0 = performance.now(), paused = false, pausedAt = 0;
+  addEventListener('keydown', (e) => {
+    const now = (performance.now() - t0) / 1000;
+    if (e.code === 'Space') { paused = !paused; if (paused) pausedAt = now; else t0 = performance.now() - pausedAt * 1000; }
+    if (e.code === 'ArrowRight') t0 -= 5000;
+    if (e.code === 'ArrowLeft') t0 += 5000;
+  });
+  document.fonts.ready.then(() => {
+    t0 = performance.now();
+    (function loop() {
+      const t = paused ? pausedAt : ((performance.now() - t0) / 1000) % DURATION;
+      render(Math.max(0, t)); requestAnimationFrame(loop);
+    })();
+  });
+} else {
+  render(0);
+}
+</script>
+</body>
+</html>

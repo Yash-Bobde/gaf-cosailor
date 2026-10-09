@@ -49,6 +49,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${newsreader.variable} ${jakarta.variable} ${jetbrainsMono.variable} min-h-screen antialiased`}
       >
         {children}
+        <footer className="mx-auto max-w-6xl px-4 pb-8 pt-4 text-center text-xs text-ink-faint sm:px-6">
+          Built by{' '}
+          <a
+            href="https://github.com/Yash-Bobde"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-line-strong underline-offset-4 hover:text-ink"
+          >
+            Yash
+          </a>
+        </footer>
       </body>
     </html>
   );

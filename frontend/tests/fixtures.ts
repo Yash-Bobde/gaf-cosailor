@@ -44,7 +44,7 @@ export function makeRun(overrides: Partial<PipelineStatusResponse> = {}): Pipeli
     leads_enriched: 0,
     leads_failed: 0,
     cancel_requested: false,
-    started_at: '2026-09-26T10:00:00Z',
+    started_at: '2026-10-09T10:00:00Z',
     finished_at: null,
     error_message: null,
     postal_code: '10013',

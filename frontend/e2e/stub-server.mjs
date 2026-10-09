@@ -35,7 +35,7 @@ const ENRICHED_LEAD = {
   talking_points: ['Master Elite status', 'Owens Corning gap', 'Staten Island volume'],
   recommended_approach: 'Ask for Maria Lopez and lead with warranty tiers.',
   status: 'enriched', error_message: null,
-  enriched_at: '2026-09-26T10:00:30Z', created_at: '2026-09-26T10:00:05Z',
+  enriched_at: '2026-10-09T10:00:30Z', created_at: '2026-10-09T10:00:05Z',
 };
 
 let state;
@@ -56,7 +56,7 @@ reset();
 function runRow(patch) {
   return {
     run_id: RUN_ID, status: 'running', leads_scraped: 0, leads_enriched: 0, leads_failed: 0,
-    cancel_requested: false, started_at: '2026-09-26T10:00:00Z', finished_at: null,
+    cancel_requested: false, started_at: '2026-10-09T10:00:00Z', finished_at: null,
     error_message: null, postal_code: '10013', country_code: 'us', distance: 25,
     segment: 'residential', ...state.run, ...patch,
   };
@@ -74,14 +74,14 @@ function advance() {
     } else {
       state.leads = [ENRICHED_LEAD];
       state.run = runRow({ leads_scraped: 1, leads_enriched: 1,
-        ...(polls >= 3 ? { status: 'completed', finished_at: '2026-09-26T10:00:40Z' } : {}) });
+        ...(polls >= 3 ? { status: 'completed', finished_at: '2026-10-09T10:00:40Z' } : {}) });
     }
   } else if (scenario === 'cancel') {
     state.run = state.run.cancel_requested
-      ? runRow({ status: 'cancelled', leads_scraped: 5, leads_enriched: 1, finished_at: '2026-09-26T10:01:00Z' })
+      ? runRow({ status: 'cancelled', leads_scraped: 5, leads_enriched: 1, finished_at: '2026-10-09T10:01:00Z' })
       : runRow({ leads_scraped: 5, leads_enriched: 1 });
   } else if (scenario === 'run-fails') {
-    state.run = runRow({ status: 'failed', finished_at: '2026-09-26T10:00:50Z',
+    state.run = runRow({ status: 'failed', finished_at: '2026-10-09T10:00:50Z',
       error_message: 'GAF locator page could not be loaded (TimeoutError)' });
   }
   return state.run;

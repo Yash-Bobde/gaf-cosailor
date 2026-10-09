@@ -80,7 +80,7 @@ describe('RunPanel while running', () => {
   it('polls, refreshes the call sheet and shows the completed outcome', async () => {
     api.getLatestPipelineRun.mockResolvedValue(makeRun({ leads_scraped: 2 }));
     api.getPipelineStatus.mockResolvedValue(
-      makeRun({ status: 'completed', leads_scraped: 2, leads_enriched: 2, finished_at: '2026-09-26T10:01:00Z' }));
+      makeRun({ status: 'completed', leads_scraped: 2, leads_enriched: 2, finished_at: '2026-10-09T10:01:00Z' }));
     await renderPanel();
 
     await act(async () => { await vi.advanceTimersByTimeAsync(3000); });

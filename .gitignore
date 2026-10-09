@@ -36,9 +36,5 @@ coverage.xml
 .coverage
 htmlcov/
 
-# Brand film build outputs (regenerate with docs/brand/film/score.py / render.mjs)
-docs/brand/film/score.wav
-docs/brand/film/stills/
-
 # Local database backups (may contain research data)
 backups/

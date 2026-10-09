@@ -467,8 +467,7 @@ frontend/
   hooks/usePipelineRun.ts    Start, attach to, poll and cancel a run
   lib/                       API client, types, formatting and tier logic
   tests/, e2e/               Vitest unit tests, Playwright E2E with a stub backend
-docs/
-  brand/                     Logo, favicon and brand film
+docs/                        Case study brief, demo script and production architecture
 ```
 
 ---
@@ -523,7 +522,6 @@ rolling it out to whole sales teams. The detailed design for the platform items 
 | [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md) | The case study brief this project answers (revised June 2026) |
 | [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) | A five-minute demo walkthrough |
 | [`docs/PRODUCTION_ARCHITECTURE.md`](docs/PRODUCTION_ARCHITECTURE.md) | Design for auth, tenancy, row-level security, the job queue and alerts |
-| [`docs/brand-guidelines.md`](docs/brand-guidelines.md) | Voice, messaging, colour, type and UI rules, plus a [brand film](docs/brand/cosailor-brand-film.mp4) |
 | [`frontend/README.md`](frontend/README.md) | Frontend commands and design notes |
 
 <p align="center">

@@ -398,7 +398,7 @@ research and `gpt-4o-mini` for scoring:
 |---|---|
 | The case study search: all 84 residential leads within 25 miles of 10013, scraped, researched and scored (2026-10-09) | **2 min 12 s** in total, 84 of 84 scored, none failed |
 | Research for one lead with Perplexity (2026-10-09) | About 5 s, 4,725 tokens, $0.0017 |
-| Score and brief for one lead with OpenAI | 3.41 s, 1,133 input and 331 output tokens |
+| Score and brief for one lead with OpenAI (2026-10-09) | 3.41 s, 1,133 input and 331 output tokens |
 | Live GAF scrape, first page (2026-10-09) | About 8.6 s |
 
 ---
